@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <sstream>
 #include <cctype>
+#include <unordered_set>
 
 DictProducer::DictProducer(const Configuration& config, std::shared_ptr<SplitTool> splitTool)
     : config_(config), splitTool_(splitTool) {
@@ -124,7 +125,7 @@ void DictProducer::storeDict() {
     
     // 按词频降序排序
     std::sort(sortedDict.begin(), sortedDict.end(), 
-              [](const auto& a, const auto& b) {
+              [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
                   return a.second > b.second;
               });
     
