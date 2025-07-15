@@ -7,13 +7,13 @@
 #include <unordered_set>
 
 DictProducer::DictProducer(const Configuration& config, std::shared_ptr<SplitTool> splitTool)
-    : config_(config), splitTool_(splitTool) {
+    : _config(config), _splitTool(splitTool) {
     
     // 从配置文件获取路径
-    corpusPath_ = config_.get("Paths.corpus_path");
-    dictOutputPath_ = config_.get("Paths.dict_output");
-    dictIndexPath_ = config_.get("Paths.dict_index");
-    stopWordsPath_ = config_.get("Paths.stop_words");
+    _corpusPath = _config.get("Paths.corpus_path");
+    _dictOutputPath = _config.get("Paths.dict_output");
+    _dictIndexPath = _config.get("Paths.dict_index");
+    _stopWordsPath = _config.get("Paths.stop_words");
     
     // 加载停用词表
     loadStopWords();
@@ -21,11 +21,11 @@ DictProducer::DictProducer(const Configuration& config, std::shared_ptr<SplitToo
 
 void DictProducer::buildDict() {
     std::cout << "开始构建词典..." << std::endl;
-    std::cout << "语料库路径: " << corpusPath_ << std::endl;
+    std::cout << "语料库路径: " << _corpusPath << std::endl;
     
     // 扫描语料库目录
-    dirScanner_(corpusPath_);
-    std::vector<std::string> files = dirScanner_.files();
+    _dirScanner(_corpusPath);
+    std::vector<std::string> files = _dirScanner.files();
     
     std::cout << "找到 " << files.size() << " 个文件" << std::endl;
     
@@ -35,7 +35,7 @@ void DictProducer::buildDict() {
         processFile(filepath);
     }
     
-    std::cout << "词典构建完成，共 " << dict_.size() << " 个词汇" << std::endl;
+    std::cout << "词典构建完成，共 " << _dict.size() << " 个词汇" << std::endl;
 }
 
 void DictProducer::processFile(const std::string& filepath) {
@@ -60,20 +60,20 @@ void DictProducer::processFile(const std::string& filepath) {
 
 void DictProducer::processText(const std::string& text) {
     // 使用分词工具进行分词
-    std::vector<std::string> words = splitTool_->cut(text);
+    std::vector<std::string> words = _splitTool->cut(text);
     
     // 统计词频
     for (const auto& word : words) {
         if (isValidWord(word) && !isStopWord(word)) {
-            dict_[word]++;
+            _dict[word]++;
         }
     }
 }
 
 void DictProducer::loadStopWords() {
-    std::ifstream file(stopWordsPath_);
+    std::ifstream file(_stopWordsPath);
     if (!file.is_open()) {
-        std::cerr << "Warning: 无法打开停用词文件: " << stopWordsPath_ << std::endl;
+        std::cerr << "Warning: 无法打开停用词文件: " << _stopWordsPath << std::endl;
         return;
     }
     
@@ -84,15 +84,15 @@ void DictProducer::loadStopWords() {
         word.erase(word.find_last_not_of(" \t\r\n") + 1);
         
         if (!word.empty()) {
-            stopWords_.insert(word);
+            _stopWords.insert(word);
         }
     }
     
-    std::cout << "加载了 " << stopWords_.size() << " 个停用词" << std::endl;
+    std::cout << "加载了 " << _stopWords.size() << " 个停用词" << std::endl;
 }
 
 bool DictProducer::isStopWord(const std::string& word) const {
-    return stopWords_.find(word) != stopWords_.end();
+    return _stopWords.find(word) != _stopWords.end();
 }
 
 bool DictProducer::isValidWord(const std::string& word) const {
@@ -117,9 +117,9 @@ void DictProducer::storeDict() {
     
     // 将词典转换为vector并排序
     std::vector<std::pair<std::string, int>> sortedDict;
-    sortedDict.reserve(dict_.size());
+    sortedDict.reserve(_dict.size());
     
-    for (const auto& pair : dict_) {
+    for (const auto& pair : _dict) {
         sortedDict.push_back(pair);
     }
     
@@ -130,15 +130,15 @@ void DictProducer::storeDict() {
               });
     
     // 存储词典文件
-    std::ofstream dictFile(dictOutputPath_);
+    std::ofstream dictFile(_dictOutputPath);
     if (!dictFile.is_open()) {
-        throw std::runtime_error("无法创建词典文件: " + dictOutputPath_);
+        throw std::runtime_error("无法创建词典文件: " + _dictOutputPath);
     }
     
     // 存储词典索引文件
-    std::ofstream indexFile(dictIndexPath_);
+    std::ofstream indexFile(_dictIndexPath);
     if (!indexFile.is_open()) {
-        throw std::runtime_error("无法创建词典索引文件: " + dictIndexPath_);
+        throw std::runtime_error("无法创建词典索引文件: " + _dictIndexPath);
     }
     
     // 写入词典文件
@@ -148,13 +148,15 @@ void DictProducer::storeDict() {
     
     // 写入索引文件（词 -> 偏移量）
     std::streampos offset = 0;
+    dictFile.clear();
+    dictFile.seekp(0, std::ios::beg);
     for (const auto& pair : sortedDict) {
         indexFile << pair.first << " " << offset << std::endl;
         offset = dictFile.tellp();
     }
     
     std::cout << "词典存储完成" << std::endl;
-    std::cout << "词典文件: " << dictOutputPath_ << std::endl;
-    std::cout << "索引文件: " << dictIndexPath_ << std::endl;
+    std::cout << "词典文件: " << _dictOutputPath << std::endl;
+    std::cout << "索引文件: " << _dictIndexPath << std::endl;
 }
 
