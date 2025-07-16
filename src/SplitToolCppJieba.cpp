@@ -8,7 +8,7 @@ SplitToolCppJieba::SplitToolCppJieba(const std::string& dictPath,
                                      const std::string& userDictPath,
                                      const std::string& stopWordsPath) {
     _jieba = std::make_unique<cppjieba::Jieba>(
-        dictPath, hmmPath, userDictPath, cppjieba::IDF_DICT_PATH, cppjieba::STOP_WORD_DICT_PATH
+        dictPath, hmmPath, userDictPath
     );
     loadStopWords(stopWordsPath);
 }

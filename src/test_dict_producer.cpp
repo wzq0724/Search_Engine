@@ -1,3 +1,4 @@
+#include "Configuration.hpp"
 #include "DictProducer.hpp"
 #include "SplitToolCppJieba.hpp"
 #include <iostream>
