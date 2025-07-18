@@ -97,3 +97,4 @@ std::string Configuration::trim(const std::string& str) {
 
     return std::string(start,end+1);
 }
+
