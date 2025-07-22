@@ -93,3 +93,9 @@ $(BIN_DIR)/test_online_data_loader: $(BIN_DIR)/test_online_data_loader.o $(NON_T
 
 test-online-data-loader: $(BIN_DIR)/test_online_data_loader
 	./$(BIN_DIR)/test_online_data_loader 
+
+$(BIN_DIR)/test_query_processor: $(BIN_DIR)/test_query_processor.o $(NON_TEST_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@ $(LIBS)
+
+test-query-processor: $(BIN_DIR)/test_query_processor
+	./$(BIN_DIR)/test_query_processor 
