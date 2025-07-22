@@ -84,3 +84,12 @@ help:
 	@echo "  help             - 显示此帮助信息"
 
 .PHONY: all clean test test-dir-scanner test-dict-producer test-inverted-index offline help 
+
+BIN_DIR = bin
+SRC_DIR = src
+
+$(BIN_DIR)/test_online_data_loader: $(BIN_DIR)/test_online_data_loader.o $(NON_TEST_OBJECTS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@ $(LIBS)
+
+test-online-data-loader: $(BIN_DIR)/test_online_data_loader
+	./$(BIN_DIR)/test_online_data_loader 
